@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <h1>Image permutator</h1>
+  <form method="post" enctype="multipart/form-data"
+        action="api/process_image">
+    <div>
+      <label for="file">Choose file to upload</label>
+      <input name="image" type="file" accept=".jpg, .jpeg, .png"/>
+    </div>
+    <div>
+      <label for="segments">Number of segments:</label>
+      <input name="num" id="segments" value="5"/>
+    </div>
+    <div>
+      <input type="submit" value="Submit"/>
+    </div>
+  </form>
+</html>
