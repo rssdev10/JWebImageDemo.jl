@@ -1,6 +1,7 @@
 #!/usr/bin/env julia --project=@.
 
 using Bukdu # pipeline Conn routes resources get plug Router
+using HTTP: Multipart
 using Sockets
 using FileIO
 
@@ -20,34 +21,11 @@ struct WelcomeController <: ApplicationController
     conn::Conn
 end
 
-import HTTP, HTTP.Parsers
-
-"""
-https://www.ietf.org/rfc/rfc2616.txt
-"""
-function parse_multipart(data::Vector{UInt8})
-    chunk_end = HTTP.Parsers.find_end_of_chunk_size(data)
-    if chunk_end == 0
-        return nothing
-    end
-
-    boundary = data[1:chunk_end - 2] # without \r\n
-    header_end = HTTP.Parsers.find_end_of_header(data)
-
-    data_start = header_end + 1
-    data_end = length(data) - chunk_end - 2
-    # check that ending is with same boundary + two additional hyphens
-    if (data[data_end + 1: end] == [boundary..., 0x2d, 0x2d, 0x0d, 0x0a])
-       return data[data_start : data_end]
-    end
-    return nothing
-end
-
 function process_image(c::WelcomeController)
-    data = parse_multipart(c.conn.request.body)
-    dump(c.conn.request)
-    if data != nothing
-        buf = IOBuffer(data)
+    image = c.params.image
+    dump(image)
+    if image isa Multipart && !eof(image)
+        buf = image.data
         img = FileIO.load(Stream(format"PNG", buf))
         out_img = JWebImageDemo.permute_image(img, 5)
         out_buf = IOBuffer()
