@@ -1,3 +1,6 @@
+"""
+The module implements logic of permutation of input image
+"""
 module JWebImageDemo
 
 using Images
@@ -5,21 +8,37 @@ using Random
 
 export permute_image
 
+"""
+Calculate first and last points after centering by specific length
+"""
 center_begin_end(actual::Int, required::Int) =
     round(Int, (actual - required) / 2) .+ [1, required]
 
-function resize(img, maxSize::Int)
+"""
+Resize the image
+"""
+function resize(img::Matrix, maxSize::Int)
     sz = round.(Int, size(img) .* (maxSize / max(size(img)...)))
     σ = map((o,n) -> 0.05 * o / n, size(img), sz)
     kern = KernelFactors.gaussian(σ)   # from ImageFiltering
     return imresize(imfilter(img, kern, NA()), sz)
 end
 
+"""
+Transform zone number into matrix indices
+"""
 zone_to_coords(ind::Vector{Int}, step::Int) =
     ind .* step |>
     list -> map(x -> range(x + 1, stop = x + step), list)
 
-function permute_image(img::Matrix, num::Int)::Matrix
+"""
+Perform image permutation
+
+# Arguments
+- `img::Matrix`: the source image as a matrix of colors
+- `num::Int`: the number of parts for splitting each axis
+"""
+function permute_image(img::Matrix, num = 5::Int)::Matrix
     l = min(size(img)...)
     x = center_begin_end(size(img, 2), l)
     y = center_begin_end(size(img, 1), l)
