@@ -23,6 +23,7 @@ end
 import HTTP, HTTP.Parsers
 
 """
+Workaround while this feature is not implemented in HTTP.jl
 https://www.ietf.org/rfc/rfc2616.txt
 """
 function parse_multipart(data::Vector{UInt8})
@@ -38,18 +39,23 @@ function parse_multipart(data::Vector{UInt8})
     data_end = length(data) - chunk_end - 2
     # check that ending is with same boundary + two additional hyphens
     if (data[data_end + 1: end] == [boundary..., 0x2d, 0x2d, 0x0d, 0x0a])
-       return data[data_start : data_end]
+        result = data[data_start : data_end]
+        length(result) > 10 && return result # fails on empty new lines
     end
     return nothing
 end
 
+"""
+Process incomming query with image file
+Generate output image in PNG format
+"""
 function process_image(c::WelcomeController)
     data = parse_multipart(c.conn.request.body)
-    dump(c.conn.request)
+    # dump(c.conn.request)
     if data != nothing
         buf = IOBuffer(data)
         img = FileIO.load(Stream(format"PNG", buf))
-        out_img = JWebImageDemo.permute_image(img, 5)
+        out_img = JWebImageDemo.permute_image(img) # , 5)
         out_buf = IOBuffer()
         FileIO.save(Stream(format"PNG", out_buf), out_img)
         return Render("image/png", take!(out_buf))
@@ -58,7 +64,7 @@ function process_image(c::WelcomeController)
 end
 
 routes() do
-    plug(Plug.Static, at="/", from=normpath(@__DIR__, "../public"))
+    plug(Plug.Static, at="/", from=normpath(@__DIR__, "..", "public"))
 
     post("/api/process_image", WelcomeController, process_image)
 end
