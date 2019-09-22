@@ -7,10 +7,10 @@ force_native_image!()
 
 # Build an executable
 build_executable(
-    "run.jl", # Julia script containing a `julia_main` function, e.g. like `examples/hello.jl`
+    "starter.jl", # Julia script containing a `julia_main` function, e.g. like `examples/hello.jl`
     snoopfile = "test/runtests.jl", # Julia script which calls functions that you want to make sure to have precompiled [optional]
     builddir = "build" # that's where the compiled artifacts will end up [optional]
 )
 
 # Build a shared library
-build_shared_lib("run.jl")
+build_shared_lib("src/JWebImageDemo.jl")
