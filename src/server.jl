@@ -69,11 +69,14 @@ routes() do
     post("/api/process_image", WelcomeController, process_image)
 end
 
-Bukdu.start(server.port; host=server.host)
+function start_server()
+    Bukdu.start(server.port; host=server.host)
 
-Router.call(get, "/") #
-# CLI.routes()
+    # Router.call(get, "/") #
+    # CLI.routes()
 
-Base.JLOptions().isinteractive==0 && wait()
+    Base.JLOptions().isinteractive==0 && wait()
+    #Bukdu.stop()
+end
 
-# Bukdu.stop()
+endswith(PROGRAM_FILE,  basename(@__FILE__)) && start_server()
