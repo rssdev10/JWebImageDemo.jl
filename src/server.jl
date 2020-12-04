@@ -8,9 +8,9 @@ using JWebImageDemo
 
 function get_server()
     if haskey(ENV, "ON_HEROKU")
-        (port=parse(Int, ENV["PORT"]), host=ip"0.0.0.0")
+        (port = parse(Int, ENV["PORT"]), host = ip"0.0.0.0")
     else
-        (port=8080, host=ip"127.0.0.1")
+        (port = 8080, host = ip"127.0.0.1")
     end
 end
 
@@ -62,19 +62,19 @@ function process_image(c::WelcomeController)
 end
 
 routes() do
-    plug(Plug.Static, at="/", from=normpath(@__DIR__, "..", "public"))
+    plug(Plug.Static, at = "/", from = normpath(@__DIR__, "..", "public"))
 
     post("/api/process_image", WelcomeController, process_image)
 end
 
 function start_server()
-    Bukdu.start(server.port; host=server.host)
+    Bukdu.start(server.port; host = server.host)
 
     # Router.call(get, "/") #
     # CLI.routes()
 
-    Base.JLOptions().isinteractive==0 && wait()
+    Base.JLOptions().isinteractive == 0 && wait()
     #Bukdu.stop()
 end
 
-endswith(PROGRAM_FILE,  basename(@__FILE__)) && start_server()
+endswith(PROGRAM_FILE, basename(@__FILE__)) && start_server()

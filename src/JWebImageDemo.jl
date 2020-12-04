@@ -19,7 +19,7 @@ Resize the image
 """
 function resize(img::Matrix, maxSize::Int)
     sz = round.(Int, size(img) .* (maxSize / max(size(img)...)))
-    σ = map((o,n) -> 0.05 * o / n, size(img), sz)
+    σ = map((o, n) -> 0.05 * o / n, size(img), sz)
     kern = KernelFactors.gaussian(σ)   # from ImageFiltering
     return imresize(imfilter(img, kern, NA()), sz)
 end
@@ -28,8 +28,7 @@ end
 Transform zone number into matrix indices
 """
 zone_to_coords(ind::Vector{Int}, step::Int) =
-    ind .* step |>
-    list -> map(x -> range(x + 1, stop = x + step), list)
+    ind .* step |> list -> map(x -> range(x + 1, stop = x + step), list)
 
 """
 Perform image permutation
