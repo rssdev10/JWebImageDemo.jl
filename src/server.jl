@@ -77,4 +77,4 @@ function start_server()
     #Bukdu.stop()
 end
 
-endswith(PROGRAM_FILE, basename(@__FILE__)) && start_server()
+# endswith(PROGRAM_FILE, basename(@__FILE__)) && start_server()

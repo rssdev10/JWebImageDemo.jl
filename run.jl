@@ -21,8 +21,6 @@ Base.@ccallable function julia_main(ARGS::Vector{String})::Cint
     return 0
 end
 
-include("src/server.jl")
-
 # run when exactly this script is activated
 endswith(PROGRAM_FILE,  basename(@__FILE__)) && start_server()
 end
