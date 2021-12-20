@@ -1,26 +1,38 @@
 #!/usr/bin/env julia --project=@.
-module Starter
+# module Starter
+doc = """Web service starter
 
-# this part is required for PackageCompiler
-import Sockets
-Sockets.__init__()
+Usage:
+  $(Base.basename(@__FILE__)) [--port=<num>] [--base_url=<url>] [--bind=<ip>]
 
-import HTTP.URIs
-import HTTP.Parsers
-URIs.__init__()
-Parsers.__init__()
+Options:
+  -h --help         Show this screen
+  -p, --port=<num>  Port  [default: 8080]
+  -b, --bind=<ip>   Bind address [default: 0.0.0.0]
+  --base_url=<url>  Additional URL prefix for the service [default: /]
 
-import QuartzImageIO
-#import ImageMagick
-# end of PackageCompiler
+"""
 
-include("src/server.jl")
+using DocOpt  # import docopt function
+using Pkg
 
-Base.@ccallable function julia_main(ARGS::Vector{String})::Cint
-    start_server()
-    return 0
-end
+args = docopt(doc, version=Pkg.project().version)
+#@info args
 
-# run when exactly this script is activated
-endswith(PROGRAM_FILE,  basename(@__FILE__)) && start_server()
-end
+using Sockets
+BASE_URL = args["--base_url"]
+HOST = Sockets.getaddrinfo(args["--bind"])
+PORT = parse(Int, args["--port"])
+
+app_server = Pkg.project().name
+@info "Activating web service..."
+@eval using $(Symbol(app_server))
+m = getfield(Main, Symbol(app_server))
+
+# endswith(PROGRAM_FILE, basename(@__FILE__)) && start_server()
+m.AppServer.start_server(
+    host = string(HOST),
+    port = PORT,
+    base_url = BASE_URL,
+)
+# end
