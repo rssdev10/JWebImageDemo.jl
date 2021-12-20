@@ -11,15 +11,6 @@ get(multipart::Vector{HTTP.Multipart}, name::String) =
     findfirst(part -> part.name == name, multipart) |>
     idx -> isnothing(idx) ? nothing : multipart[idx]
 
-# function get(multipart::Vector{HTTP.Multipart}, name::String)::Union{HTTP.Multipart, Nothing}
-#     for part in multipart
-#         if part.name == name
-#             return part
-#         end
-#     end
-#     return nothing
-# end
-
 """
 Process incomming query with image file
 Generate output image in PNG format
@@ -36,12 +27,13 @@ function process_image(c::WelcomeController)
     isnothing(mp_num) &&
         return render(Text, "Please specify number of sections in num field")
 
-    local img = FileIO.load(Stream(format"PNG", mp_file.data))
+    local img = FileIO.load(Stream{format"PNG"}(mp_file.data))
     local out_img = JWebImageDemo.permute_image(
         img,
         tryparse(Int, String(take!(mp_num.data))) |> x -> something(x, 5),
     )
     local out_buf = IOBuffer()
-    FileIO.save(Stream(format"PNG", out_buf), out_img)
-    return Render(mp_file.contenttype, identity, take!(out_buf))
+    show(out_buf, MIME("image/png"), out_img)
+    # return Render(mp_file.contenttype, identity, take!(out_buf))
+    return Render("image/png", identity, take!(out_buf))
 end

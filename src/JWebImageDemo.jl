@@ -57,4 +57,6 @@ function permute_image(img::Matrix, num = 5::Int)::Matrix
     return img_out
 end
 
+include("server.jl")
+
 end # module

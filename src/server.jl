@@ -1,7 +1,4 @@
-#!/usr/bin/env julia --project=@.
-
-# process command line
-include("./cli.jl")
+module AppServer
 
 # main service code
 
@@ -11,15 +8,13 @@ using FileIO
 
 using JWebImageDemo
 
-function get_server()
+function get_server(host, port)
     if haskey(ENV, "ON_HEROKU")
         (port = parse(Int, ENV["PORT"]), host = ip"0.0.0.0")
     else
-        (port = PORT, host = HOST)
+        (port = port, host = host)
     end
 end
-
-server = get_server()
 
 struct WelcomeController <: ApplicationController
     conn::Conn
@@ -29,21 +24,33 @@ import HTTP, HTTP.Parsers
 # include business logic part
 include("./handlers.jl")
 
-# register handlers
-routes() do
-    plug(Plug.Static, at = "$BASE_URL/", from = normpath(@__DIR__, "..", "public"))
+function register_routes()
+    global BASE_URL
+    # register handlers
+    routes() do
+        plug(Plug.Static, at = "$BASE_URL/", from = normpath(@__DIR__, "..", "public"))
 
-    post("$BASE_URL/api/process_image", WelcomeController, process_image)
+        post(BASE_URL * "api/process_image", WelcomeController, process_image)
+    end
 end
 
-function start_server()
+function start_server(; host = "127.0.0.1", port = 8080, base_url = "")
+    global BASE_URL = base_url * (endswith(base_url, "/") ? "" : "/")
+    if isdefined(AppServer, :register_routes)
+        register_routes()
+    else
+        @error "register_routes method must be defined"
+        throw(UndefVarError)
+    end
+
+    local server = get_server(Sockets.getaddrinfo(host), port)
     Bukdu.start(server.port; host = server.host)
 
     # Router.call(get, "/") #
-    # CLI.routes()
+    CLI.routes()
 
     Base.JLOptions().isinteractive == 0 && wait()
     #Bukdu.stop()
 end
-
-endswith(PROGRAM_FILE, basename(@__FILE__)) && start_server()
+# endswith(PROGRAM_FILE, basename(@__FILE__)) && start_server()
+end
