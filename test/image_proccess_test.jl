@@ -12,7 +12,7 @@ isdir(TMP_PATH) || mkdir(TMP_PATH)
     img = FileIO.load(TEST_IMAGE)
     for i = 2:NUM
         @time img_out = JWebImageDemo.permute_image(img, i)
-        #save(Stream(format"PNG",io), data...)
+        # save(Stream{format"PNG"}(io), data...)
         @test size(img) != size(img_out) ||
             any(((i, o),) -> i != o, zip(iterate(img), iterate(img_out)))
         save(joinpath(TMP_PATH, "out_$i.jpg"), img_out)

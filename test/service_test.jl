@@ -1,8 +1,10 @@
+using JWebImageDemo
 using Test
 
 import HTTP
 
-const PORT = "8080"
+const ON_HEROKU = "true"
+const PORT = rand(8090:9999)
 const HOST = "127.0.0.1"
 const VERBOSE = 2
 
@@ -15,16 +17,7 @@ const TEST_REQUESTS = Dict(
 )
 
 @info "Running web service"
-module TestService
-#    include(joinpath(@__DIR__, "..", "run.jl"))
-    include(joinpath(@__DIR__, "..", "src", "server.jl"))
-
-    activate(port, host) =
-        withenv("PORT" => port, "HOST" => host) do
-            start_server()
-        end
-end
-service = @async TestService.activate(PORT, HOST)
+service = @async JWebImageDemo.AppServer.start_server(;host = string(HOST), port = PORT)
 
 sleep(10)
 @testset "web service" begin
@@ -44,7 +37,7 @@ sleep(10)
             @info "Status: $(r.status)"
             @test r.status == 200
             @test any(t -> contains(t.first, "Content-Type") && 
-                           contains(t.second, "image/jpeg"),
+                           contains(t.second, "image/png"),
                       r.headers)
             
            break
