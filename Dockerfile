@@ -1,7 +1,8 @@
-FROM julia:1.7.0
+FROM julia:1.8
 
 RUN apt-get update
-RUN yes | apt-get install bzip2 wget gcc clang
+ENV DEBIAN_FRONTEND noninteractive
+RUN yes | apt-get install bzip2 wget gcc clang unzip xz-utils
 
 COPY . /opt/webapp
 
